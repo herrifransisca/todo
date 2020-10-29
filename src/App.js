@@ -26,7 +26,24 @@ const App = () => {
   };
 
   const onComplete = (item) => {
-    console.log("onComplete called");
+    console.log("onComplete called", item);
+
+    const tasksCopy = [...tasks];
+    const index = tasksCopy.indexOf(item);
+    console.log("index", index);
+    // #1
+    tasksCopy[index] = { ...item };
+    tasksCopy[index].status = "completed";
+    // console.log("tasksCopy#1", tasksCopy);
+
+    // #2- by changing item status, will it effect "tasks" ?
+    // item.status = "Completed";
+    // console.log("item", item);
+    // tasksCopy[index] = { ...item };
+    // console.log("tasksCopy#2", tasksCopy);
+
+    setTasks(tasksCopy);
+    window.localStorage.setItem("tasks", JSON.stringify(tasksCopy));
   };
 
   const onAdd = (value) => {
