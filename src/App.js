@@ -26,11 +26,8 @@ const App = () => {
   };
 
   const onComplete = (item) => {
-    console.log("onComplete called", item);
-
     const tasksCopy = [...tasks];
     const index = tasksCopy.indexOf(item);
-    console.log("index", index);
     // #1
     tasksCopy[index] = { ...item };
     tasksCopy[index].status = "completed";
@@ -42,6 +39,15 @@ const App = () => {
     // tasksCopy[index] = { ...item };
     // console.log("tasksCopy#2", tasksCopy);
 
+    setTasks(tasksCopy);
+    window.localStorage.setItem("tasks", JSON.stringify(tasksCopy));
+  };
+
+  const onIncomplete = (item) => {
+    const tasksCopy = [...tasks];
+    const index = tasksCopy.indexOf(item);
+    tasksCopy[index] = { ...item };
+    tasksCopy[index].status = "pending";
     setTasks(tasksCopy);
     window.localStorage.setItem("tasks", JSON.stringify(tasksCopy));
   };
@@ -126,7 +132,11 @@ const App = () => {
                       >
                         Complete
                       </Button>,
-                      <Button key="edit" type="link">
+                      <Button
+                        key="edit"
+                        onClick={() => onEdit(item)}
+                        type="link"
+                      >
                         Edit
                       </Button>,
                       <Button
@@ -146,7 +156,17 @@ const App = () => {
                 header={<Text strong>Completed</Text>}
                 dataSource={tasks.filter((t) => t.status === "completed")}
                 renderItem={(item) => (
-                  <List.Item>
+                  <List.Item
+                    actions={[
+                      <Button
+                        key="incomplete"
+                        onClick={() => onIncomplete(item)}
+                        type="link"
+                      >
+                        Incomplete
+                      </Button>,
+                    ]}
+                  >
                     <Text delete>{item.task}</Text>
                   </List.Item>
                 )}
