@@ -68,6 +68,15 @@ const App = () => {
     window.localStorage.setItem("tasks", JSON.stringify(newTasks));
   };
 
+  const onEdit = (item, editedTask) => {
+    const tasksCopy = [...tasks];
+    const index = tasksCopy.indexOf(item);
+    tasksCopy[index] = { ...item };
+    tasksCopy[index].task = editedTask;
+    setTasks(tasksCopy);
+    window.localStorage.setItem("tasks", JSON.stringify(tasksCopy));
+  };
+
   const onDelete = (item) => {
     const newTasks = tasks.filter((t) => t.id !== item.id);
     setTasks(tasks.filter((t) => t.id !== item.id));
@@ -133,13 +142,6 @@ const App = () => {
                         Complete
                       </Button>,
                       <Button
-                        key="edit"
-                        onClick={() => onEdit(item)}
-                        type="link"
-                      >
-                        Edit
-                      </Button>,
-                      <Button
                         key="delete"
                         onClick={() => onDelete(item)}
                         type="link"
@@ -148,7 +150,13 @@ const App = () => {
                       </Button>,
                     ]}
                   >
-                    {item.task}
+                    <Typography.Paragraph
+                      editable={{
+                        onChange: (editedTask) => onEdit(item, editedTask),
+                      }}
+                    >
+                      {item.task}
+                    </Typography.Paragraph>
                   </List.Item>
                 )}
               />
