@@ -12,13 +12,14 @@ import {
 } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import { v4 as uuidv4 } from "uuid";
+import { useLocalStorageState } from "./utils";
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
 const { Search } = Input;
 
 const App = () => {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useLocalStorageState("tasks", []);
   const [addedTask, setAddedTask] = useState("");
 
   const handleAddedTask = (e) => {
@@ -40,7 +41,6 @@ const App = () => {
     // console.log("tasksCopy#2", tasksCopy);
 
     setTasks(tasksCopy);
-    window.localStorage.setItem("tasks", JSON.stringify(tasksCopy));
   };
 
   const onIncomplete = (item) => {
@@ -49,7 +49,6 @@ const App = () => {
     tasksCopy[index] = { ...item };
     tasksCopy[index].status = "pending";
     setTasks(tasksCopy);
-    window.localStorage.setItem("tasks", JSON.stringify(tasksCopy));
   };
 
   const onAdd = (value) => {
@@ -64,8 +63,6 @@ const App = () => {
       },
     ];
     setTasks(newTasks);
-
-    window.localStorage.setItem("tasks", JSON.stringify(newTasks));
   };
 
   const onEdit = (item, editedTask) => {
@@ -74,18 +71,12 @@ const App = () => {
     tasksCopy[index] = { ...item };
     tasksCopy[index].task = editedTask;
     setTasks(tasksCopy);
-    window.localStorage.setItem("tasks", JSON.stringify(tasksCopy));
   };
 
   const onDelete = (item) => {
     const newTasks = tasks.filter((t) => t.id !== item.id);
     setTasks(tasks.filter((t) => t.id !== item.id));
-    window.localStorage.setItem("tasks", JSON.stringify(newTasks));
   };
-
-  useEffect(() => {
-    setTasks(JSON.parse(window.localStorage.getItem("tasks")) || []);
-  }, []);
 
   return (
     <Layout>
