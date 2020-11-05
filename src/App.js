@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import {
   Button,
+  Modal,
   Input,
   Layout,
   List,
@@ -21,6 +22,9 @@ const { Search } = Input;
 const App = () => {
   const [tasks, setTasks] = useLocalStorageState("tasks", []);
   const [addedTask, setAddedTask] = useState("");
+  const [user, setUser] = useState(null);
+  const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
 
   const handleAddedTask = (e) => {
     setAddedTask(e.target.value);
@@ -78,6 +82,30 @@ const App = () => {
     setTasks(tasks.filter((t) => t.id !== item.id));
   };
 
+  const showRegisterModal = () => {
+    setIsRegisterModalVisible(true);
+  };
+
+  const handleOkRegisterModal = (e) => {
+    setIsRegisterModalVisible(false);
+  };
+
+  const handleCancelRegisterModal = (e) => {
+    setIsRegisterModalVisible(false);
+  };
+
+  const showLoginModal = () => {
+    setIsLoginModalVisible(true);
+  };
+
+  const handleOkLoginModal = (e) => {
+    setIsLoginModalVisible(false);
+  };
+
+  const handleCancelLoginModal = (e) => {
+    setIsLoginModalVisible(false);
+  };
+
   return (
     <Layout>
       <Sider
@@ -94,6 +122,49 @@ const App = () => {
             Tasks
           </Menu.Item>
         </Menu>
+
+        <div style={{ marginTop: "160px" }}>
+          <div style={{ color: "#fff" }}>
+            {/* Username: {user ? user.name : null} */}
+            Username: Illusion
+          </div>
+          {/* <div style={{ color: "#fff" }}>Email: {user ? user.email : null}</div> */}
+          <div style={{ color: "#fff" }}>Email: illusion@gmail.com</div>
+
+          <Space
+            direction="vertical"
+            style={{ width: "100%", marginTop: "16px" }}
+          >
+            <Button onClick={showRegisterModal} style={{ width: "100%" }}>
+              Register
+            </Button>
+            <Button onClick={showLoginModal} style={{ width: "100%" }}>
+              Login
+            </Button>
+          </Space>
+
+          <Modal
+            title="Register"
+            visible={isRegisterModalVisible}
+            onOk={handleOkRegisterModal}
+            onCancel={handleCancelRegisterModal}
+          >
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+          </Modal>
+
+          <Modal
+            title="Login"
+            visible={isLoginModalVisible}
+            onOk={handleOkLoginModal}
+            onCancel={handleCancelLoginModal}
+          >
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+          </Modal>
+        </div>
       </Sider>
       <Layout className="site-layout" style={{ marginLeft: 200 }}>
         <Header style={{ padding: 0 }} className="site-layout-background">
