@@ -14,6 +14,7 @@ import {
 import { HomeOutlined } from "@ant-design/icons";
 import { v4 as uuidv4 } from "uuid";
 import { useLocalStorageState } from "./utils";
+import axios from "axios";
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
@@ -55,7 +56,7 @@ const App = () => {
     setTasks(tasksCopy);
   };
 
-  const onAdd = (value) => {
+  const onAdd = async (value) => {
     setAddedTask("");
 
     const newTasks = [
@@ -67,9 +68,24 @@ const App = () => {
       },
     ];
     setTasks(newTasks);
+
+    // api
+    const result = await axios.post(
+      "https://api-nodejs-todolist.herokuapp.com/task",
+      {
+        description: value,
+      },
+      {
+        headers: {
+          Authorization:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+        },
+      }
+    );
+    console.log("api-add-result", result);
   };
 
-  const onEdit = (item, editedTask) => {
+  const onEdit = async (item, editedTask) => {
     const tasksCopy = [...tasks];
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
@@ -106,6 +122,35 @@ const App = () => {
     setIsLoginModalVisible(false);
   };
 
+  const handleGetTasks = async () => {
+    // const result = await axios.get(
+    //   'https://api-nodejs-todolist.herokuapp.com/task',
+    //   {
+    //     origin: req.body.origin,
+    //     destination: req.body.destination,
+    //     weight: req.body.weight,
+    //     courier: req.body.courier,
+    //   },
+    //   {
+    //     headers: {
+    //       key: config.get('rajaongkirApiKey'),
+    //     },
+    //   }
+    // );
+
+    const { data } = await axios.get(
+      "https://api-nodejs-todolist.herokuapp.com/task",
+      {
+        headers: {
+          Authorization:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+        },
+      }
+    );
+
+    console.log("result", data.data);
+  };
+
   return (
     <Layout>
       <Sider
@@ -140,6 +185,9 @@ const App = () => {
             </Button>
             <Button onClick={showLoginModal} style={{ width: "100%" }}>
               Login
+            </Button>
+            <Button onClick={handleGetTasks} style={{ width: "100%" }}>
+              Get Tasks
             </Button>
           </Space>
 
