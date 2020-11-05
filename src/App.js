@@ -91,11 +91,45 @@ const App = () => {
     tasksCopy[index] = { ...item };
     tasksCopy[index].task = editedTask;
     setTasks(tasksCopy);
+
+    // api
+    try {
+      const result = await axios.put(
+        "https://api-nodejs-todolist.herokuapp.com/task/5fa35b8c9ce57e0017a37dc3",
+        {
+          completed: true,
+        },
+        {
+          headers: {
+            Authorization:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+          },
+        }
+      );
+      console.log("api-edit-result", result);
+    } catch (error) {
+      console.log("api-edit-error", error);
+    }
   };
 
-  const onDelete = (item) => {
-    const newTasks = tasks.filter((t) => t.id !== item.id);
+  const onDelete = async (item) => {
     setTasks(tasks.filter((t) => t.id !== item.id));
+
+    // api
+    try {
+      const result = await axios.delete(
+        "https://api-nodejs-todolist.herokuapp.com/task/5fa35b8c9ce57e0017a37dc3",
+        {
+          headers: {
+            Authorization:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+          },
+        }
+      );
+      console.log("api-delete-result", result);
+    } catch (error) {
+      console.log("api-delete-error", error);
+    }
   };
 
   const showRegisterModal = () => {
