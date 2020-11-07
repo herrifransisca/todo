@@ -57,6 +57,8 @@ const App = () => {
   };
 
   const onAdd = async (value) => {
+    if (value === "") return;
+
     setAddedTask("");
 
     const newTasks = [
