@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./App.css";
 import {
   Button,
@@ -23,7 +23,7 @@ const { Search } = Input;
 const App = () => {
   const [tasks, setTasks] = useLocalStorageState("tasks", []);
   const [addedTask, setAddedTask] = useState("");
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
 
