@@ -111,18 +111,19 @@ const App = () => {
   };
 
   const onEdit = async (item, editedTask) => {
+    const originalTask = [...tasks];
+
     const tasksCopy = [...tasks];
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
-    tasksCopy[index].task = editedTask;
+    tasksCopy[index].description = editedTask;
     setTasks(tasksCopy);
 
-    // api
     try {
-      const result = await axios.put(
-        "https://api-nodejs-todolist.herokuapp.com/task/5fa35b8c9ce57e0017a37dc3",
+      await axios.put(
+        `https://api-nodejs-todolist.herokuapp.com/task/${item._id}`,
         {
-          completed: true,
+          description: editedTask,
         },
         {
           headers: {
@@ -131,9 +132,9 @@ const App = () => {
           },
         }
       );
-      console.log("api-edit-result", result);
     } catch (error) {
-      console.log("api-edit-error", error);
+      setTasks(originalTask);
+      console.log("Error when changing task", error);
     }
   };
 
