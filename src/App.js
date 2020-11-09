@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import {
   Button,
@@ -21,11 +21,29 @@ const { Text } = Typography;
 const { Search } = Input;
 
 const App = () => {
-  const [tasks, setTasks] = useLocalStorageState("tasks", []);
+  const [tasks, setTasks] = useState([]);
   const [addedTask, setAddedTask] = useState("");
   // const [user, setUser] = useState(null);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+
+  const populateTasks = async () => {
+    const {
+      data: { data },
+    } = await axios.get("https://api-nodejs-todolist.herokuapp.com/task", {
+      headers: {
+        Authorization:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+      },
+    });
+    console.log("useEffect", data);
+    setTasks(data);
+    // TODO: what value returned when tasks is empty ? should I setTasks with [] if value is empty ?
+  };
+
+  useEffect(() => {
+    populateTasks();
+  }, []);
 
   const handleAddedTask = (e) => {
     setAddedTask(e.target.value);
@@ -276,7 +294,7 @@ const App = () => {
                     {tasks.filter((t) => t.status === "pending").length})
                   </Text>
                 }
-                dataSource={tasks.filter((t) => t.status === "pending")}
+                dataSource={tasks.filter((t) => t.completed === false)}
                 renderItem={(item) => (
                   <List.Item
                     actions={[
@@ -301,14 +319,14 @@ const App = () => {
                         onChange: (editedTask) => onEdit(item, editedTask),
                       }}
                     >
-                      {item.task}
+                      {item.description}
                     </Typography.Paragraph>
                   </List.Item>
                 )}
               />
               <List
                 header={<Text strong>Completed</Text>}
-                dataSource={tasks.filter((t) => t.status === "completed")}
+                dataSource={tasks.filter((t) => t.completed === true)}
                 renderItem={(item) => (
                   <List.Item
                     actions={[
@@ -321,7 +339,7 @@ const App = () => {
                       </Button>,
                     ]}
                   >
-                    <Text delete>{item.task}</Text>
+                    <Text delete>{item.description}</Text>
                   </List.Item>
                 )}
               />
