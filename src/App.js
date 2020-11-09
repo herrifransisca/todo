@@ -127,12 +127,12 @@ const App = () => {
   };
 
   const onDelete = async (item) => {
-    setTasks(tasks.filter((t) => t.id !== item.id));
+    const originalTasks = [...tasks];
+    setTasks(tasks.filter((t) => t._id !== item._id));
 
-    // api
     try {
-      const result = await axios.delete(
-        "https://api-nodejs-todolist.herokuapp.com/task/5fa35b8c9ce57e0017a37dc3",
+      await axios.delete(
+        `https://api-nodejs-todolist.herokuapp.com/task/${item._id}`,
         {
           headers: {
             Authorization:
@@ -140,8 +140,8 @@ const App = () => {
           },
         }
       );
-      console.log("api-delete-result", result);
     } catch (error) {
+      setTasks(originalTasks);
       console.log("api-delete-error", error);
     }
   };
