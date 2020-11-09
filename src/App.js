@@ -12,8 +12,6 @@ import {
   Typography,
 } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
-import { v4 as uuidv4 } from "uuid";
-import { useLocalStorageState } from "./utils";
 import axios from "axios";
 
 const { Header, Content, Sider } = Layout;
@@ -59,7 +57,7 @@ const App = () => {
     setTasks(tasksCopy);
 
     try {
-      const result = await axios.put(
+      await axios.put(
         `https://api-nodejs-todolist.herokuapp.com/task/${item._id}`,
         {
           completed: true,
@@ -182,35 +180,6 @@ const App = () => {
     setIsLoginModalVisible(false);
   };
 
-  const handleGetTasks = async () => {
-    // const result = await axios.get(
-    //   'https://api-nodejs-todolist.herokuapp.com/task',
-    //   {
-    //     origin: req.body.origin,
-    //     destination: req.body.destination,
-    //     weight: req.body.weight,
-    //     courier: req.body.courier,
-    //   },
-    //   {
-    //     headers: {
-    //       key: config.get('rajaongkirApiKey'),
-    //     },
-    //   }
-    // );
-
-    const { data } = await axios.get(
-      "https://api-nodejs-todolist.herokuapp.com/task",
-      {
-        headers: {
-          Authorization:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
-        },
-      }
-    );
-
-    console.log("result", data.data);
-  };
-
   return (
     <Layout>
       <Sider
@@ -245,9 +214,6 @@ const App = () => {
             </Button>
             <Button onClick={showLoginModal} style={{ width: "100%" }}>
               Login
-            </Button>
-            <Button onClick={handleGetTasks} style={{ width: "100%" }}>
-              Get Tasks
             </Button>
           </Space>
 
