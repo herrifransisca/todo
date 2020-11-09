@@ -34,7 +34,6 @@ const App = () => {
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
       },
     });
-    console.log("useEffect", data);
     setTasks(data);
     // TODO: what value returned when tasks is empty ? should I setTasks with [] if value is empty ?
   };
@@ -334,9 +333,24 @@ const App = () => {
                       >
                         Incomplete
                       </Button>,
+                      <Button
+                        key="delete"
+                        onClick={() => onDelete(item)}
+                        type="link"
+                      >
+                        Delete
+                      </Button>,
                     ]}
                   >
-                    <Text delete>{item.description}</Text>
+                    <Text delete>
+                      <Typography.Paragraph
+                        editable={{
+                          onChange: (editedTask) => onEdit(item, editedTask),
+                        }}
+                      >
+                        {item.description}
+                      </Typography.Paragraph>
+                    </Text>
                   </List.Item>
                 )}
               />
