@@ -77,32 +77,26 @@ const App = () => {
   const onAdd = async (value) => {
     if (value === "") return;
 
-    setAddedTask("");
-
-    const newTasks = [
-      ...tasks,
-      {
-        id: uuidv4(),
-        task: value,
-        status: "pending",
-      },
-    ];
-    setTasks(newTasks);
-
-    // api
-    const result = await axios.post(
-      "https://api-nodejs-todolist.herokuapp.com/task",
-      {
-        description: value,
-      },
-      {
-        headers: {
-          Authorization:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+    try {
+      const {
+        data: { data },
+      } = await axios.post(
+        "https://api-nodejs-todolist.herokuapp.com/task",
+        {
+          description: value,
         },
-      }
-    );
-    console.log("api-add-result", result);
+        {
+          headers: {
+            Authorization:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+          },
+        }
+      );
+      setAddedTask("");
+      setTasks([...tasks, data]);
+    } catch (error) {
+      console.log("Error when adding a new task", error);
+    }
   };
 
   const onEdit = async (item, editedTask) => {
@@ -290,8 +284,8 @@ const App = () => {
               <List
                 header={
                   <Text strong>
-                    Pending (
-                    {tasks.filter((t) => t.status === "pending").length})
+                    Pending ({tasks.filter((t) => t.completed === false).length}
+                    )
                   </Text>
                 }
                 dataSource={tasks.filter((t) => t.completed === false)}
@@ -325,7 +319,12 @@ const App = () => {
                 )}
               />
               <List
-                header={<Text strong>Completed</Text>}
+                header={
+                  <Text strong>
+                    Completed (
+                    {tasks.filter((t) => t.completed === true).length})
+                  </Text>
+                }
                 dataSource={tasks.filter((t) => t.completed === true)}
                 renderItem={(item) => (
                   <List.Item
