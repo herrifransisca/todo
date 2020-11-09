@@ -75,12 +75,32 @@ const App = () => {
     }
   };
 
-  const onIncomplete = (item) => {
+  const onIncomplete = async (item) => {
+    const originalTasks = [...tasks];
+
     const tasksCopy = [...tasks];
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
-    tasksCopy[index].status = "pending";
+    tasksCopy[index].completed = false;
     setTasks(tasksCopy);
+
+    try {
+      await axios.put(
+        `https://api-nodejs-todolist.herokuapp.com/task/${item._id}`,
+        {
+          completed: false,
+        },
+        {
+          headers: {
+            Authorization:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+          },
+        }
+      );
+    } catch (error) {
+      setTasks(originalTasks);
+      console.log("Error when incompleting task", error);
+    }
   };
 
   const onAdd = async (value) => {
