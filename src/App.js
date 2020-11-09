@@ -49,21 +49,32 @@ const App = () => {
     setAddedTask(e.target.value);
   };
 
-  const onComplete = (item) => {
+  const onComplete = async (item) => {
+    const originalTasks = [...tasks];
+
     const tasksCopy = [...tasks];
     const index = tasksCopy.indexOf(item);
-    // #1
     tasksCopy[index] = { ...item };
-    tasksCopy[index].status = "completed";
-    // console.log("tasksCopy#1", tasksCopy);
-
-    // #2- by changing item status, will it effect "tasks" ?
-    // item.status = "Completed";
-    // console.log("item", item);
-    // tasksCopy[index] = { ...item };
-    // console.log("tasksCopy#2", tasksCopy);
-
+    tasksCopy[index].completed = true;
     setTasks(tasksCopy);
+
+    try {
+      const result = await axios.put(
+        `https://api-nodejs-todolist.herokuapp.com/task/${item._id}`,
+        {
+          completed: true,
+        },
+        {
+          headers: {
+            Authorization:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+          },
+        }
+      );
+    } catch (error) {
+      setTasks(originalTasks);
+      console.log("Error when completing task", error);
+    }
   };
 
   const onIncomplete = (item) => {
@@ -142,7 +153,7 @@ const App = () => {
       );
     } catch (error) {
       setTasks(originalTasks);
-      console.log("api-delete-error", error);
+      console.log("Error when deleting task", error);
     }
   };
 
