@@ -13,6 +13,7 @@ import {
 } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import axios from "axios";
+import LoginForm from "./components/login-form";
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
@@ -21,7 +22,7 @@ const { Search } = Input;
 const App = () => {
   const [tasks, setTasks] = useState([]);
   const [addedTask, setAddedTask] = useState("");
-  // const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
 
@@ -41,6 +42,10 @@ const App = () => {
   useEffect(() => {
     populateTasks();
   }, []);
+
+  const login = (data) => {
+    setUser(data.user);
+  };
 
   const handleAddedTask = (e) => {
     setAddedTask(e.target.value);
@@ -218,8 +223,7 @@ const App = () => {
 
         <div style={{ marginTop: "160px" }}>
           <div style={{ color: "#fff" }}>
-            {/* Username: {user ? user.name : null} */}
-            Username: Illusion
+            Username: {user ? user.name : null}
           </div>
           {/* <div style={{ color: "#fff" }}>Email: {user ? user.email : null}</div> */}
           <div style={{ color: "#fff" }}>Email: illusion@gmail.com</div>
@@ -253,9 +257,7 @@ const App = () => {
             onOk={handleOkLoginModal}
             onCancel={handleCancelLoginModal}
           >
-            <p>Some contents...</p>
-            <p>Some contents...</p>
-            <p>Some contents...</p>
+            <LoginForm onSubmit={login} />
           </Modal>
         </div>
       </Sider>
