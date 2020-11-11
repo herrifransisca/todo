@@ -23,6 +23,7 @@ const App = () => {
   const [tasks, setTasks] = useState([]);
   const [addedTask, setAddedTask] = useState("");
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
 
@@ -43,8 +44,10 @@ const App = () => {
     populateTasks();
   }, []);
 
-  const login = (data) => {
-    setUser(data.user);
+  const handleLogin = (values) => {
+    setIsLoginModalVisible(false);
+    setUser(values.user);
+    setToken(values.token);
   };
 
   const handleAddedTask = (e) => {
@@ -192,18 +195,6 @@ const App = () => {
     setIsRegisterModalVisible(false);
   };
 
-  const showLoginModal = () => {
-    setIsLoginModalVisible(true);
-  };
-
-  const handleOkLoginModal = (e) => {
-    setIsLoginModalVisible(false);
-  };
-
-  const handleCancelLoginModal = (e) => {
-    setIsLoginModalVisible(false);
-  };
-
   return (
     <Layout>
       <Sider
@@ -225,7 +216,6 @@ const App = () => {
           <div style={{ color: "#fff" }}>
             Username: {user ? user.name : null}
           </div>
-          {/* <div style={{ color: "#fff" }}>Email: {user ? user.email : null}</div> */}
           <div style={{ color: "#fff" }}>Email: illusion@gmail.com</div>
 
           <Space
@@ -235,7 +225,10 @@ const App = () => {
             <Button onClick={showRegisterModal} style={{ width: "100%" }}>
               Register
             </Button>
-            <Button onClick={showLoginModal} style={{ width: "100%" }}>
+            <Button
+              onClick={() => setIsLoginModalVisible(true)}
+              style={{ width: "100%" }}
+            >
               Login
             </Button>
           </Space>
@@ -251,14 +244,11 @@ const App = () => {
             <p>Some contents...</p>
           </Modal>
 
-          <Modal
-            title="Login"
+          <LoginForm
+            onCancel={() => setIsLoginModalVisible(false)}
+            onLogin={handleLogin}
             visible={isLoginModalVisible}
-            onOk={handleOkLoginModal}
-            onCancel={handleCancelLoginModal}
-          >
-            <LoginForm onSubmit={login} />
-          </Modal>
+          />
         </div>
       </Sider>
       <Layout className="site-layout" style={{ marginLeft: 200 }}>
