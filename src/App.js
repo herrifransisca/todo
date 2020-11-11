@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import {
   Button,
-  Modal,
   Input,
   Layout,
   List,
@@ -16,6 +15,7 @@ import { HomeOutlined } from "@ant-design/icons";
 import axios from "axios";
 import LoginForm from "./components/login-form";
 import RegisterForm from "./components/register-form";
+import { useLocalStorageState } from "./utils";
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
@@ -24,43 +24,40 @@ const { Search } = Input;
 const App = () => {
   const [tasks, setTasks] = useState([]);
   const [addedTask, setAddedTask] = useState("");
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [auth, setAuth] = useLocalStorageState("auth-todo-app", null);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
 
-  const populateTasks = async () => {
-    const {
-      data: { data },
-    } = await axios.get("https://api-nodejs-todolist.herokuapp.com/task", {
-      headers: {
-        Authorization:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
-      },
-    });
-    setTasks(data);
-    // TODO: what value returned when tasks is empty ? should I setTasks with [] if value is empty ?
-  };
-
   useEffect(() => {
+    const populateTasks = async () => {
+      const {
+        data: { data },
+      } = await axios.get("https://api-nodejs-todolist.herokuapp.com/task", {
+        headers: {
+          Authorization: auth.token,
+        },
+      });
+      setTasks(data);
+      // TODO: what value returned when tasks is empty ? should I setTasks with [] if value is empty ?
+    };
+
+    if (!auth) return setTasks([]);
     populateTasks();
-  }, []);
+  }, [auth]);
 
   const handleLogin = (values) => {
     setIsLoginModalVisible(false);
-    setUser(values.user);
-    setToken(values.token);
+    setAuth(values);
   };
 
-  const handleLogout = (values) => {
-    setUser(null);
-    setToken(null);
+  const handleLogout = () => {
+    setAuth(null);
   };
 
   const handleRegister = (values) => {
     setIsRegisterModalVisible(false);
-    setUser(values.user);
-    setToken(values.token);
+    setAuth(values);
+    // TODO: not tested yet. because cors problem
   };
 
   const handleAddedTask = (e) => {
@@ -84,8 +81,7 @@ const App = () => {
         },
         {
           headers: {
-            Authorization:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+            Authorization: auth.token,
           },
         }
       );
@@ -112,8 +108,7 @@ const App = () => {
         },
         {
           headers: {
-            Authorization:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+            Authorization: auth.token,
           },
         }
       );
@@ -136,8 +131,7 @@ const App = () => {
         },
         {
           headers: {
-            Authorization:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+            Authorization: auth.token,
           },
         }
       );
@@ -165,8 +159,7 @@ const App = () => {
         },
         {
           headers: {
-            Authorization:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+            Authorization: auth.token,
           },
         }
       );
@@ -185,8 +178,7 @@ const App = () => {
         `https://api-nodejs-todolist.herokuapp.com/task/${item._id}`,
         {
           headers: {
-            Authorization:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmEzNGUwNDljZTU3ZTAwMTdhMzdkOWQiLCJpYXQiOjE2MDQ1Mzc5NTJ9.dzmuR0DWdEo4_nrhLmZegG5pQiSV0qXGLj8-hhPDWKY",
+            Authorization: auth.token,
           },
         }
       );
@@ -218,7 +210,7 @@ const App = () => {
             direction="vertical"
             style={{ width: "100%", marginTop: "16px" }}
           >
-            {!user && (
+            {!auth && (
               <>
                 <Alert
                   message="Please login/register to start using this todo-app!"
@@ -250,13 +242,13 @@ const App = () => {
               </>
             )}
 
-            {user && (
+            {auth && (
               <>
                 <div style={{ color: "#fff" }}>
-                  Username: {user ? user.name : null}
+                  Username: {auth ? auth.user.name : null}
                 </div>
                 <div style={{ color: "#fff" }}>
-                  Email: {user ? user.email : null}
+                  Email: {auth ? auth.user.email : null}
                 </div>
                 <Button onClick={handleLogout} style={{ width: "100%" }}>
                   Logout
@@ -290,6 +282,7 @@ const App = () => {
           <div className="site-layout-background" style={{ padding: 24 }}>
             <Space direction="vertical" style={{ width: "100%" }}>
               <Search
+                disabled={Boolean(!auth)}
                 enterButton="Add"
                 onChange={handleAddedTask}
                 onSearch={onAdd}
