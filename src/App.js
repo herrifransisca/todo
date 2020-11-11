@@ -14,6 +14,7 @@ import {
 import { HomeOutlined } from "@ant-design/icons";
 import axios from "axios";
 import LoginForm from "./components/login-form";
+import RegisterForm from "./components/register-form";
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
@@ -46,6 +47,12 @@ const App = () => {
 
   const handleLogin = (values) => {
     setIsLoginModalVisible(false);
+    setUser(values.user);
+    setToken(values.token);
+  };
+
+  const handleRegister = (values) => {
+    setIsRegisterModalVisible(false);
     setUser(values.user);
     setToken(values.token);
   };
@@ -183,18 +190,6 @@ const App = () => {
     }
   };
 
-  const showRegisterModal = () => {
-    setIsRegisterModalVisible(true);
-  };
-
-  const handleOkRegisterModal = (e) => {
-    setIsRegisterModalVisible(false);
-  };
-
-  const handleCancelRegisterModal = (e) => {
-    setIsRegisterModalVisible(false);
-  };
-
   return (
     <Layout>
       <Sider
@@ -222,32 +217,29 @@ const App = () => {
             direction="vertical"
             style={{ width: "100%", marginTop: "16px" }}
           >
-            <Button onClick={showRegisterModal} style={{ width: "100%" }}>
-              Register
-            </Button>
             <Button
               onClick={() => setIsLoginModalVisible(true)}
               style={{ width: "100%" }}
             >
               Login
             </Button>
+            <Button
+              onClick={() => setIsRegisterModalVisible(true)}
+              style={{ width: "100%" }}
+            >
+              Register
+            </Button>
           </Space>
-
-          <Modal
-            title="Register"
-            visible={isRegisterModalVisible}
-            onOk={handleOkRegisterModal}
-            onCancel={handleCancelRegisterModal}
-          >
-            <p>Some contents...</p>
-            <p>Some contents...</p>
-            <p>Some contents...</p>
-          </Modal>
 
           <LoginForm
             onCancel={() => setIsLoginModalVisible(false)}
             onLogin={handleLogin}
             visible={isLoginModalVisible}
+          />
+          <RegisterForm
+            onCancel={() => setIsRegisterModalVisible(false)}
+            onLogin={handleRegister}
+            visible={isRegisterModalVisible}
           />
         </div>
       </Sider>
