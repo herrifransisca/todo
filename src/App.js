@@ -10,6 +10,7 @@ import {
   PageHeader,
   Space,
   Typography,
+  Alert,
 } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import axios from "axios";
@@ -49,6 +50,11 @@ const App = () => {
     setIsLoginModalVisible(false);
     setUser(values.user);
     setToken(values.token);
+  };
+
+  const handleLogout = (values) => {
+    setUser(null);
+    setToken(null);
   };
 
   const handleRegister = (values) => {
@@ -207,28 +213,56 @@ const App = () => {
           </Menu.Item>
         </Menu>
 
-        <div style={{ marginTop: "160px" }}>
-          <div style={{ color: "#fff" }}>
-            Username: {user ? user.name : null}
-          </div>
-          <div style={{ color: "#fff" }}>Email: illusion@gmail.com</div>
-
+        <div style={{ marginTop: "64px" }}>
           <Space
             direction="vertical"
             style={{ width: "100%", marginTop: "16px" }}
           >
-            <Button
-              onClick={() => setIsLoginModalVisible(true)}
-              style={{ width: "100%" }}
-            >
-              Login
-            </Button>
-            <Button
-              onClick={() => setIsRegisterModalVisible(true)}
-              style={{ width: "100%" }}
-            >
-              Register
-            </Button>
+            {!user && (
+              <>
+                <Alert
+                  message="Please login/register to start using this todo-app!"
+                  type="info"
+                  showIcon
+                />
+                <Alert
+                  message="Register form not working"
+                  type="error"
+                  showIcon
+                />
+                <Alert
+                  message="Please use this email/password to login: illusion@gmail.com/12345678"
+                  type="info"
+                  showIcon
+                />
+                <Button
+                  onClick={() => setIsLoginModalVisible(true)}
+                  style={{ width: "100%" }}
+                >
+                  Login
+                </Button>
+                <Button
+                  onClick={() => setIsRegisterModalVisible(true)}
+                  style={{ width: "100%" }}
+                >
+                  Register
+                </Button>
+              </>
+            )}
+
+            {user && (
+              <>
+                <div style={{ color: "#fff" }}>
+                  Username: {user ? user.name : null}
+                </div>
+                <div style={{ color: "#fff" }}>
+                  Email: {user ? user.email : null}
+                </div>
+                <Button onClick={handleLogout} style={{ width: "100%" }}>
+                  Logout
+                </Button>
+              </>
+            )}
           </Space>
 
           <LoginForm
