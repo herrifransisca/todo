@@ -1,24 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import {
-  Button,
-  Input,
-  Layout,
-  List,
-  Menu,
-  PageHeader,
-  Space,
-  Typography,
-  Alert,
-} from "antd";
+import { Button, Input, Layout, Menu, PageHeader, Space, Alert } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import axios from "axios";
 import LoginForm from "./components/login-form";
 import RegisterForm from "./components/register-form";
 import { useLocalStorageState } from "./utils";
+import TodoList from "./components/todo-list";
 
 const { Header, Content, Sider } = Layout;
-const { Text } = Typography;
 const { Search } = Input;
 
 const App = () => {
@@ -289,81 +279,19 @@ const App = () => {
                 placeholder="Add a task"
                 value={addedTask}
               />
-              <List
-                header={
-                  <Text strong>
-                    Pending ({tasks.filter((t) => t.completed === false).length}
-                    )
-                  </Text>
-                }
-                dataSource={tasks.filter((t) => t.completed === false)}
-                renderItem={(item) => (
-                  <List.Item
-                    actions={[
-                      <Button
-                        key="complete"
-                        onClick={() => onComplete(item)}
-                        type="link"
-                      >
-                        Complete
-                      </Button>,
-                      <Button
-                        key="delete"
-                        onClick={() => onDelete(item)}
-                        type="link"
-                      >
-                        Delete
-                      </Button>,
-                    ]}
-                  >
-                    <Typography.Paragraph
-                      editable={{
-                        onChange: (editedTask) => onEdit(item, editedTask),
-                      }}
-                    >
-                      {item.description}
-                    </Typography.Paragraph>
-                  </List.Item>
-                )}
+              <TodoList
+                completed={false}
+                tasks={tasks}
+                onComplete={onComplete}
+                onDelete={onDelete}
+                onEdit={onEdit}
               />
-              <List
-                header={
-                  <Text strong>
-                    Completed (
-                    {tasks.filter((t) => t.completed === true).length})
-                  </Text>
-                }
-                dataSource={tasks.filter((t) => t.completed === true)}
-                renderItem={(item) => (
-                  <List.Item
-                    actions={[
-                      <Button
-                        key="incomplete"
-                        onClick={() => onIncomplete(item)}
-                        type="link"
-                      >
-                        Incomplete
-                      </Button>,
-                      <Button
-                        key="delete"
-                        onClick={() => onDelete(item)}
-                        type="link"
-                      >
-                        Delete
-                      </Button>,
-                    ]}
-                  >
-                    <Text delete>
-                      <Typography.Paragraph
-                        editable={{
-                          onChange: (editedTask) => onEdit(item, editedTask),
-                        }}
-                      >
-                        {item.description}
-                      </Typography.Paragraph>
-                    </Text>
-                  </List.Item>
-                )}
+              <TodoList
+                completed={true}
+                tasks={tasks}
+                onDelete={onDelete}
+                onEdit={onEdit}
+                onIncomplete={onIncomplete}
               />
             </Space>
           </div>
