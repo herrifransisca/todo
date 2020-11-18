@@ -7,6 +7,7 @@ import LoginForm from "./components/login-form";
 import RegisterForm from "./components/register-form";
 import { useLocalStorageState } from "./utils";
 import TodoList from "./components/todo-list";
+import { ErrorBoundary } from "react-error-boundary";
 
 const { Header, Content, Sider } = Layout;
 const { Search } = Input;
@@ -20,15 +21,19 @@ const App = () => {
 
   useEffect(() => {
     const populateTasks = async () => {
-      const {
-        data: { data },
-      } = await axios.get("https://api-nodejs-todolist.herokuapp.com/task", {
-        headers: {
-          Authorization: auth.token,
-        },
-      });
-      setTasks(data);
-      // TODO: what value returned when tasks is empty ? should I setTasks with [] if value is empty ?
+      try {
+        const {
+          data: { data },
+        } = await axios.get("https://api-nodejs-todolist.herokuapp.com/task", {
+          headers: {
+            Authorization: auth.token,
+          },
+        });
+        setTasks(data);
+        // TODO: what value returned when tasks is empty ? should I setTasks with [] if value is empty ?
+      } catch (error) {
+        throw error;
+      }
     };
 
     if (!auth) return setTasks([]);
@@ -78,6 +83,7 @@ const App = () => {
     } catch (error) {
       setTasks(originalTasks);
       console.log("Error when completing task", error);
+      throw error;
     }
   };
 
@@ -105,6 +111,7 @@ const App = () => {
     } catch (error) {
       setTasks(originalTasks);
       console.log("Error when incompleting task", error);
+      throw error;
     }
   };
 
@@ -129,6 +136,7 @@ const App = () => {
       setTasks([...tasks, data]);
     } catch (error) {
       console.log("Error when adding a new task", error);
+      throw error;
     }
   };
 
@@ -156,6 +164,7 @@ const App = () => {
     } catch (error) {
       setTasks(originalTask);
       console.log("Error when changing task", error);
+      throw error;
     }
   };
 
@@ -175,8 +184,13 @@ const App = () => {
     } catch (error) {
       setTasks(originalTasks);
       console.log("Error when deleting task", error);
+      throw error;
     }
   };
+
+  const ErrorFallback = ({ error, resetErrorBoundary }) => (
+    <Alert message="Error" description={error.message} type="error" showIcon />
+  );
 
   return (
     <Layout>
@@ -271,28 +285,40 @@ const App = () => {
         <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
           <div className="site-layout-background" style={{ padding: 24 }}>
             <Space direction="vertical" style={{ width: "100%" }}>
-              <Search
-                disabled={Boolean(!auth)}
-                enterButton="Add"
-                onChange={handleAddedTask}
-                onSearch={onAdd}
-                placeholder="Add a task"
-                value={addedTask}
-              />
-              <TodoList
-                completed={false}
-                tasks={tasks}
-                onComplete={onComplete}
-                onDelete={onDelete}
-                onEdit={onEdit}
-              />
-              <TodoList
-                completed={true}
-                tasks={tasks}
-                onDelete={onDelete}
-                onEdit={onEdit}
-                onIncomplete={onIncomplete}
-              />
+              <ErrorBoundary
+                FallbackComponent={ErrorFallback}
+                onReset={() => setAddedTask("")}
+                resetKeys={[addedTask]}
+              >
+                <Search
+                  disabled={Boolean(!auth)}
+                  enterButton="Add"
+                  onChange={handleAddedTask}
+                  onSearch={onAdd}
+                  placeholder="Add a task"
+                  value={addedTask}
+                />
+              </ErrorBoundary>
+              <ErrorBoundary
+                FallbackComponent={ErrorFallback}
+                onReset={() => setTasks([])}
+                resetKeys={[tasks]}
+              >
+                <TodoList
+                  completed={false}
+                  tasks={tasks}
+                  onComplete={onComplete}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                />
+                <TodoList
+                  completed={true}
+                  tasks={tasks}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                  onIncomplete={onIncomplete}
+                />
+              </ErrorBoundary>
             </Space>
           </div>
         </Content>
