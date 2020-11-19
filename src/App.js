@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import "./App.css";
 import { Button, Input, Layout, Menu, PageHeader, Space, Alert } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
@@ -12,8 +12,10 @@ import { ErrorBoundary } from "react-error-boundary";
 const { Header, Content, Sider } = Layout;
 const { Search } = Input;
 
+const tasksReducer = (state, newState) => newState;
+
 const App = () => {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useReducer(tasksReducer, []);
   const [addedTask, setAddedTask] = useState("");
   const [auth, setAuth] = useLocalStorageState("auth-todo-app", null);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
