@@ -1,6 +1,16 @@
 import React, { useEffect, useReducer, useState } from "react";
 import "./App.css";
-import { Button, Input, Layout, Menu, PageHeader, Space, Alert } from "antd";
+import {
+  Button,
+  Input,
+  Layout,
+  Menu,
+  PageHeader,
+  Space,
+  Alert,
+  Empty,
+  Spin,
+} from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import axios from "axios";
 import LoginForm from "./components/login-form";
@@ -15,13 +25,21 @@ const { Search } = Input;
 const tasksReducer = (state, newState) => newState;
 
 const App = () => {
-  const [tasks, setTasks] = useReducer(tasksReducer, []);
+  const [state, setState] = useReducer(tasksReducer, {
+    status: "idle",
+    tasks: null,
+    error: null,
+  });
+  const { status, tasks, error } = state;
+
   const [addedTask, setAddedTask] = useState("");
   const [auth, setAuth] = useLocalStorageState("auth-todo-app", null);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
 
   useEffect(() => {
+    if (!auth) return;
+    setState({ status: "pending" });
     const populateTasks = async () => {
       try {
         const {
@@ -31,14 +49,12 @@ const App = () => {
             Authorization: auth.token,
           },
         });
-        setTasks(data);
+        setState({ status: "resolved", tasks: data });
         // TODO: what value returned when tasks is empty ? should I setTasks with [] if value is empty ?
       } catch (error) {
-        throw error;
+        setState({ status: "rejected", error });
       }
     };
-
-    if (!auth) return setTasks([]);
     populateTasks();
   }, [auth]);
 
@@ -68,7 +84,7 @@ const App = () => {
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
     tasksCopy[index].completed = true;
-    setTasks(tasksCopy);
+    setState({ tasks: tasksCopy });
 
     try {
       await axios.put(
@@ -83,7 +99,7 @@ const App = () => {
         }
       );
     } catch (error) {
-      setTasks(originalTasks);
+      setState({ tasks: originalTasks });
       console.log("Error when completing task", error);
       throw error;
     }
@@ -96,7 +112,7 @@ const App = () => {
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
     tasksCopy[index].completed = false;
-    setTasks(tasksCopy);
+    setState({ tasks: tasksCopy });
 
     try {
       await axios.put(
@@ -111,7 +127,7 @@ const App = () => {
         }
       );
     } catch (error) {
-      setTasks(originalTasks);
+      setState({ tasks: originalTasks });
       console.log("Error when incompleting task", error);
       throw error;
     }
@@ -135,7 +151,7 @@ const App = () => {
         }
       );
       setAddedTask("");
-      setTasks([...tasks, data]);
+      setState({ tasks: [...tasks, data] });
     } catch (error) {
       console.log("Error when adding a new task", error);
       throw error;
@@ -149,7 +165,7 @@ const App = () => {
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
     tasksCopy[index].description = editedTask;
-    setTasks(tasksCopy);
+    setState({ tasks: tasksCopy });
 
     try {
       await axios.put(
@@ -164,7 +180,7 @@ const App = () => {
         }
       );
     } catch (error) {
-      setTasks(originalTask);
+      setState({ tasks: originalTask });
       console.log("Error when changing task", error);
       throw error;
     }
@@ -172,7 +188,7 @@ const App = () => {
 
   const onDelete = async (item) => {
     const originalTasks = [...tasks];
-    setTasks(tasks.filter((t) => t._id !== item._id));
+    setState({ tasks: tasks.filter((t) => t._id !== item._id) });
 
     try {
       await axios.delete(
@@ -184,7 +200,7 @@ const App = () => {
         }
       );
     } catch (error) {
-      setTasks(originalTasks);
+      setState({ tasks: originalTasks });
       console.log("Error when deleting task", error);
       throw error;
     }
@@ -193,6 +209,10 @@ const App = () => {
   const ErrorFallback = ({ error, resetErrorBoundary }) => (
     <Alert message="Error" description={error.message} type="error" showIcon />
   );
+
+  if (status === "idle") return <Empty />;
+  if (status === "pending") return <Spin />;
+  if (status === "rejected") throw error;
 
   return (
     <Layout>
@@ -303,7 +323,7 @@ const App = () => {
               </ErrorBoundary>
               <ErrorBoundary
                 FallbackComponent={ErrorFallback}
-                onReset={() => setTasks([])}
+                onReset={() => setState({ tasks: [] })}
                 resetKeys={[tasks]}
               >
                 <TodoList
