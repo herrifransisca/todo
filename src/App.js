@@ -14,11 +14,10 @@ import { HomeOutlined } from '@ant-design/icons';
 import LoginForm from './components/login-form';
 import RegisterForm from './components/register-form';
 import { useLocalStorageState } from './utils';
-import TodoList from './components/todo-list';
-import { ErrorBoundary } from 'react-error-boundary';
 import client from './utils/api-client';
 import { useAsync } from './utils/hooks';
 import TodoForm from './components/todo-form';
+import TodoLists from './components/todo-lists';
 
 const { Header, Content, Sider } = Layout;
 
@@ -61,69 +60,6 @@ const App = () => {
     setIsRegisterModalVisible(false);
     setAuth(values);
     // TODO: not tested yet. because cors problem
-  };
-
-  const onComplete = async (item) => {
-    const originalTasks = [...tasks];
-
-    const tasksCopy = [...tasks];
-    const index = tasksCopy.indexOf(item);
-    tasksCopy[index] = { ...item };
-    tasksCopy[index].completed = true;
-    setData(tasksCopy);
-
-    try {
-      await client.completeTask(auth.token, item._id);
-    } catch (error) {
-      setData(originalTasks);
-      setError(error);
-    }
-  };
-
-  const onIncomplete = async (item) => {
-    const originalTasks = [...tasks];
-
-    const tasksCopy = [...tasks];
-    const index = tasksCopy.indexOf(item);
-    tasksCopy[index] = { ...item };
-    tasksCopy[index].completed = false;
-    setData(tasksCopy);
-
-    try {
-      await client.inCompleteTask(auth.token, item._id);
-    } catch (error) {
-      setData(originalTasks);
-      setError(error);
-    }
-  };
-
-  const onEdit = async (item, editedTask) => {
-    const originalTask = [...tasks];
-
-    const tasksCopy = [...tasks];
-    const index = tasksCopy.indexOf(item);
-    tasksCopy[index] = { ...item };
-    tasksCopy[index].description = editedTask;
-    setData(tasksCopy);
-
-    try {
-      await client.editTask(auth.token, item._id, editedTask);
-    } catch (error) {
-      setData(originalTask);
-      setError(error);
-    }
-  };
-
-  const onDelete = async (item) => {
-    const originalTasks = [...tasks];
-    setData(tasks.filter((t) => t._id !== item._id));
-
-    try {
-      await client.deleteTask(auth.token, item._id);
-    } catch (error) {
-      setData(originalTasks);
-      setError(error);
-    }
   };
 
   const ErrorFallback = ({ error, resetErrorBoundary }) => (
@@ -242,26 +178,13 @@ const App = () => {
                   onError={setError}
                   tasks={tasks}
                 />
-                <ErrorBoundary
-                  FallbackComponent={ErrorFallback}
-                  onReset={() => setData([])}
-                  resetKeys={[tasks]}
-                >
-                  <TodoList
-                    completed={false}
-                    tasks={tasks}
-                    onComplete={onComplete}
-                    onDelete={onDelete}
-                    onEdit={onEdit}
-                  />
-                  <TodoList
-                    completed={true}
-                    tasks={tasks}
-                    onDelete={onDelete}
-                    onEdit={onEdit}
-                    onIncomplete={onIncomplete}
-                  />
-                </ErrorBoundary>
+                <TodoLists
+                  auth={auth}
+                  ErrorFallback={ErrorFallback}
+                  onData={setData}
+                  onError={setError}
+                  tasks={tasks}
+                />
               </Space>
             ) : null}
           </div>
