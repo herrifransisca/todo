@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import {
   Button,
@@ -12,26 +12,33 @@ import {
   Spin,
 } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
-import axios from 'axios';
 import LoginForm from './components/login-form';
 import RegisterForm from './components/register-form';
 import { useLocalStorageState } from './utils';
 import TodoList from './components/todo-list';
 import { ErrorBoundary } from 'react-error-boundary';
 import client from './utils/api-client';
+import { useAsync } from './utils/hooks';
 
 const { Header, Content, Sider } = Layout;
 const { Search } = Input;
 
-const tasksReducer = (state, newState) => newState;
-
 const App = () => {
-  const [state, setState] = useReducer(tasksReducer, {
-    status: 'idle',
-    tasks: null,
+  const {
+    data: tasks,
+    error,
+    isError,
+    isIdle,
+    isLoading,
+    isSuccess,
+    setData,
+    setError,
+    run,
+  } = useAsync({
     error: null,
+    status: 'idle',
+    data: null,
   });
-  const { status, tasks, error } = state;
 
   const [addedTask, setAddedTask] = useState('');
   const [auth, setAuth] = useLocalStorageState('auth-todo-app', null);
@@ -40,19 +47,8 @@ const App = () => {
 
   useEffect(() => {
     if (!auth) return;
-    setState({ status: 'pending' });
-    const populateTasks = async () => {
-      try {
-        const {
-          data: { data },
-        } = await client.getTasks(auth.token);
-        setState({ status: 'resolved', tasks: data });
-      } catch (error) {
-        setState({ status: 'rejected', error });
-      }
-    };
-    populateTasks();
-  }, [auth]);
+    run(client.getTasks(auth.token));
+  }, [run, auth]);
 
   const handleLogin = (values) => {
     setIsLoginModalVisible(false);
@@ -80,14 +76,13 @@ const App = () => {
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
     tasksCopy[index].completed = true;
-    setState({ tasks: tasksCopy });
+    setData(tasksCopy);
 
     try {
       await client.completeTask(auth.token, item._id);
     } catch (error) {
-      setState({ tasks: originalTasks });
-      console.log('Error when completing task', error);
-      throw error;
+      setData(originalTasks);
+      setError(error);
     }
   };
 
@@ -98,14 +93,13 @@ const App = () => {
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
     tasksCopy[index].completed = false;
-    setState({ tasks: tasksCopy });
+    setData(tasksCopy);
 
     try {
       await client.inCompleteTask(auth.token, item._id);
     } catch (error) {
-      setState({ tasks: originalTasks });
-      console.log('Error when incompleting task', error);
-      throw error;
+      setData(originalTasks);
+      setError(error);
     }
   };
 
@@ -114,13 +108,12 @@ const App = () => {
 
     try {
       const {
-        data: { data },
+        data: { data: result },
       } = await client.addTask(auth.token, value);
       setAddedTask('');
-      setState({ tasks: [...tasks, data] });
+      setData([...tasks, result]);
     } catch (error) {
-      console.log('Error when adding a new task', error);
-      throw error;
+      setError(error);
     }
   };
 
@@ -131,37 +124,31 @@ const App = () => {
     const index = tasksCopy.indexOf(item);
     tasksCopy[index] = { ...item };
     tasksCopy[index].description = editedTask;
-    setState({ tasks: tasksCopy });
+    setData(tasksCopy);
 
     try {
       await client.editTask(auth.token, item._id, editedTask);
     } catch (error) {
-      setState({ tasks: originalTask });
-      console.log('Error when changing task', error);
-      throw error;
+      setData(originalTask);
+      setError(error);
     }
   };
 
   const onDelete = async (item) => {
     const originalTasks = [...tasks];
-    setState({ tasks: tasks.filter((t) => t._id !== item._id) });
+    setData(tasks.filter((t) => t._id !== item._id));
 
     try {
       await client.deleteTask(auth.token, item._id);
     } catch (error) {
-      setState({ tasks: originalTasks });
-      console.log('Error when deleting task', error);
-      throw error;
+      setData(originalTasks);
+      setError(error);
     }
   };
 
   const ErrorFallback = ({ error, resetErrorBoundary }) => (
     <Alert message="Error" description={error.message} type="error" showIcon />
   );
-
-  if (status === 'idle') return <Empty />;
-  if (status === 'pending') return <Spin />;
-  if (status === 'rejected') throw error;
 
   return (
     <Layout>
@@ -255,42 +242,55 @@ const App = () => {
         </Header>
         <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
           <div className="site-layout-background" style={{ padding: 24 }}>
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <ErrorBoundary
-                FallbackComponent={ErrorFallback}
-                onReset={() => setAddedTask('')}
-                resetKeys={[addedTask]}
-              >
-                <Search
-                  disabled={Boolean(!auth)}
-                  enterButton="Add"
-                  onChange={handleAddedTask}
-                  onSearch={onAdd}
-                  placeholder="Add a task"
-                  value={addedTask}
-                />
-              </ErrorBoundary>
-              <ErrorBoundary
-                FallbackComponent={ErrorFallback}
-                onReset={() => setState({ tasks: [] })}
-                resetKeys={[tasks]}
-              >
-                <TodoList
-                  completed={false}
-                  tasks={tasks}
-                  onComplete={onComplete}
-                  onDelete={onDelete}
-                  onEdit={onEdit}
-                />
-                <TodoList
-                  completed={true}
-                  tasks={tasks}
-                  onDelete={onDelete}
-                  onEdit={onEdit}
-                  onIncomplete={onIncomplete}
-                />
-              </ErrorBoundary>
-            </Space>
+            {isIdle ? <Empty /> : null}
+
+            {isLoading ? <Spin /> : null}
+
+            {isError ? (
+              <div css={{ color: 'red' }}>
+                <p>There was an error:</p>
+                <pre>{error.message}</pre>
+              </div>
+            ) : null}
+
+            {isSuccess ? (
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <ErrorBoundary
+                  FallbackComponent={ErrorFallback}
+                  onReset={() => setAddedTask('')}
+                  resetKeys={[addedTask]}
+                >
+                  <Search
+                    disabled={Boolean(!auth)}
+                    enterButton="Add"
+                    onChange={handleAddedTask}
+                    onSearch={onAdd}
+                    placeholder="Add a task"
+                    value={addedTask}
+                  />
+                </ErrorBoundary>
+                <ErrorBoundary
+                  FallbackComponent={ErrorFallback}
+                  onReset={() => setData([])}
+                  resetKeys={[tasks]}
+                >
+                  <TodoList
+                    completed={false}
+                    tasks={tasks}
+                    onComplete={onComplete}
+                    onDelete={onDelete}
+                    onEdit={onEdit}
+                  />
+                  <TodoList
+                    completed={true}
+                    tasks={tasks}
+                    onDelete={onDelete}
+                    onEdit={onEdit}
+                    onIncomplete={onIncomplete}
+                  />
+                </ErrorBoundary>
+              </Space>
+            ) : null}
           </div>
         </Content>
       </Layout>
