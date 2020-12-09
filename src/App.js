@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import {
-  Button,
-  Layout,
-  Menu,
-  PageHeader,
-  Space,
-  Alert,
-  Empty,
-  Spin,
-} from 'antd';
+import { Button, Layout, Menu, Space, Alert, Empty, Spin } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
 import LoginForm from './components/login-form';
 import RegisterForm from './components/register-form';
@@ -18,8 +9,9 @@ import client from './utils/api-client';
 import { useAsync } from './utils/hooks';
 import TodoForm from './components/todo-form';
 import TodoLists from './components/todo-lists';
+import TopHeader from './components/top-header';
 
-const { Header, Content, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 const App = () => {
   const {
@@ -148,14 +140,7 @@ const App = () => {
         </div>
       </Sider>
       <Layout className="site-layout" style={{ marginLeft: 200 }}>
-        <Header style={{ padding: 0 }} className="site-layout-background">
-          <PageHeader
-            onBack={() => null}
-            title="Tasks"
-            backIcon={<HomeOutlined />}
-          />
-          ,
-        </Header>
+        <TopHeader />
         <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
           <div className="site-layout-background" style={{ padding: 24 }}>
             {isIdle ? <Empty /> : null}
