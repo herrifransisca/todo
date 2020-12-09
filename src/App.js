@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import {
   Button,
-  Input,
   Layout,
   Menu,
   PageHeader,
@@ -19,9 +18,9 @@ import TodoList from './components/todo-list';
 import { ErrorBoundary } from 'react-error-boundary';
 import client from './utils/api-client';
 import { useAsync } from './utils/hooks';
+import TodoForm from './components/todo-form';
 
 const { Header, Content, Sider } = Layout;
-const { Search } = Input;
 
 const App = () => {
   const {
@@ -40,7 +39,6 @@ const App = () => {
     data: null,
   });
 
-  const [addedTask, setAddedTask] = useState('');
   const [auth, setAuth] = useLocalStorageState('auth-todo-app', null);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
@@ -63,10 +61,6 @@ const App = () => {
     setIsRegisterModalVisible(false);
     setAuth(values);
     // TODO: not tested yet. because cors problem
-  };
-
-  const handleAddedTask = (e) => {
-    setAddedTask(e.target.value);
   };
 
   const onComplete = async (item) => {
@@ -99,20 +93,6 @@ const App = () => {
       await client.inCompleteTask(auth.token, item._id);
     } catch (error) {
       setData(originalTasks);
-      setError(error);
-    }
-  };
-
-  const onAdd = async (value) => {
-    if (value === '') return;
-
-    try {
-      const {
-        data: { data: result },
-      } = await client.addTask(auth.token, value);
-      setAddedTask('');
-      setData([...tasks, result]);
-    } catch (error) {
       setError(error);
     }
   };
@@ -255,20 +235,13 @@ const App = () => {
 
             {isSuccess ? (
               <Space direction="vertical" style={{ width: '100%' }}>
-                <ErrorBoundary
-                  FallbackComponent={ErrorFallback}
-                  onReset={() => setAddedTask('')}
-                  resetKeys={[addedTask]}
-                >
-                  <Search
-                    disabled={Boolean(!auth)}
-                    enterButton="Add"
-                    onChange={handleAddedTask}
-                    onSearch={onAdd}
-                    placeholder="Add a task"
-                    value={addedTask}
-                  />
-                </ErrorBoundary>
+                <TodoForm
+                  auth={auth}
+                  ErrorFallback={ErrorFallback}
+                  onData={setData}
+                  onError={setError}
+                  tasks={tasks}
+                />
                 <ErrorBoundary
                   FallbackComponent={ErrorFallback}
                   onReset={() => setData([])}
