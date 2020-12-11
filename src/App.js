@@ -55,15 +55,7 @@ const taskReducer = (state, action) => {
 };
 
 const App = () => {
-  const {
-    error,
-    isError,
-    isIdle,
-    isLoading,
-    isSuccess,
-    setError,
-    run,
-  } = useAsync();
+  const { error, isError, isIdle, isLoading, isSuccess, run } = useAsync();
   const [state, dispatch] = useReducer(taskReducer, { tasks: [] });
   const [auth, setAuth] = useLocalStorageState('auth-todo-app', null);
 
@@ -102,14 +94,14 @@ const App = () => {
                   auth={auth}
                   ErrorFallback={ErrorFallback}
                   onDispatch={dispatch}
-                  onError={setError}
+                  onRun={run}
                   tasks={state.tasks}
                 />
                 <TodoLists
                   auth={auth}
                   ErrorFallback={ErrorFallback}
                   onDispatch={dispatch}
-                  onError={setError}
+                  onRun={run}
                   tasks={state.tasks}
                 />
               </Space>

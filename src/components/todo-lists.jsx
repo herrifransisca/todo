@@ -2,7 +2,7 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import TodoList from './todo-list';
 
-const TodoLists = ({ auth, ErrorFallback, onDispatch, onError, tasks }) => {
+const TodoLists = ({ auth, ErrorFallback, onDispatch, onRun, tasks }) => {
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
@@ -12,14 +12,14 @@ const TodoLists = ({ auth, ErrorFallback, onDispatch, onError, tasks }) => {
       <TodoList
         auth={auth}
         onDispatch={onDispatch}
-        onError={onError}
+        onRun={onRun}
         completed={false}
         tasks={tasks}
       />
       <TodoList
         auth={auth}
         onDispatch={onDispatch}
-        onError={onError}
+        onRun={onRun}
         completed={true}
         tasks={tasks}
       />

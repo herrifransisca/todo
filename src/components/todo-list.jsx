@@ -4,7 +4,7 @@ import client from '../utils/api-client';
 
 const { Text } = Typography;
 
-const TodoList = ({ auth, completed, tasks, onDispatch, onError }) => {
+const TodoList = ({ auth, completed, tasks, onDispatch, onRun }) => {
   const filtered = tasks.filter((t) => t.completed === completed);
   const count = filtered.length;
   const title = completed ? 'Completed' : 'Pending';
@@ -14,10 +14,9 @@ const TodoList = ({ auth, completed, tasks, onDispatch, onError }) => {
     onDispatch({ type: 'EDIT', item, editedTask });
 
     try {
-      await client.editTask(auth.token, item._id, editedTask);
+      await onRun(client.editTask(auth.token, item._id, editedTask));
     } catch (error) {
       onDispatch({ type: 'POPULATE', payload: originalTask });
-      onError(error);
     }
   };
 
@@ -26,10 +25,9 @@ const TodoList = ({ auth, completed, tasks, onDispatch, onError }) => {
     onDispatch({ type: 'DELETE', payload: item });
 
     try {
-      await client.deleteTask(auth.token, item._id);
+      await onRun(client.deleteTask(auth.token, item._id));
     } catch (error) {
       onDispatch(originalTasks);
-      onError(error);
     }
   };
 
@@ -38,10 +36,9 @@ const TodoList = ({ auth, completed, tasks, onDispatch, onError }) => {
     onDispatch({ type: 'COMPLETE', item });
 
     try {
-      await client.completeTask(auth.token, item._id);
+      await onRun(client.completeTask(auth.token, item._id));
     } catch (error) {
       onDispatch({ type: 'POPULATE', payload: originalTasks });
-      onError(error);
     }
   };
 
@@ -50,10 +47,9 @@ const TodoList = ({ auth, completed, tasks, onDispatch, onError }) => {
     onDispatch({ type: 'INCOMPLETE', item });
 
     try {
-      await client.inCompleteTask(auth.token, item._id);
+      await onRun(client.inCompleteTask(auth.token, item._id));
     } catch (error) {
       onDispatch({ type: 'POPULATE', payload: originalTasks });
-      onError(error);
     }
   };
 
