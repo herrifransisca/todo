@@ -5,7 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 const { Search } = Input;
 
-const TodoForm = ({ auth, ErrorFallback, onData, onError, tasks }) => {
+const TodoForm = ({ auth, ErrorFallback, onDispatch, onError, tasks }) => {
   const [addedTask, setAddedTask] = useState('');
 
   const handleAddedTask = (e) => {
@@ -20,7 +20,7 @@ const TodoForm = ({ auth, ErrorFallback, onData, onError, tasks }) => {
         data: { data: result },
       } = await client.addTask(auth.token, value);
       setAddedTask('');
-      onData([...tasks, result]);
+      onDispatch({ type: 'ADD', payload: result });
     } catch (error) {
       onError(error);
     }

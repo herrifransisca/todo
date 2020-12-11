@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import './App.css';
 import { Layout, Space, Alert, Empty, Spin } from 'antd';
 import { useLocalStorageState } from './utils';
@@ -11,27 +11,70 @@ import AppSider from './components/app-sider';
 
 const { Content } = Layout;
 
+const taskReducer = (state, action) => {
+  switch (action.type) {
+    case 'POPULATE':
+      return { ...state, tasks: action.payload };
+
+    case 'ADD':
+      return { ...state, tasks: [...state.tasks, action.payload] };
+
+    case 'DELETE':
+      return {
+        ...state,
+        tasks: state.tasks.filter((t) => t._id !== action.payload._id),
+      };
+
+    case 'EDIT': {
+      const tasksCopy = [...state.tasks];
+      const index = tasksCopy.indexOf(action.item);
+      tasksCopy[index] = { ...action.item };
+      tasksCopy[index].description = action.editedTask;
+      return { ...state, tasks: tasksCopy };
+    }
+
+    case 'COMPLETE': {
+      const tasksCopy = [...state.tasks];
+      const index = tasksCopy.indexOf(action.item);
+      tasksCopy[index] = { ...action.item };
+      tasksCopy[index].completed = true;
+      return { ...state, tasks: tasksCopy };
+    }
+
+    case 'INCOMPLETE': {
+      const tasksCopy = [...state.tasks];
+      const index = tasksCopy.indexOf(action.item);
+      tasksCopy[index] = { ...action.item };
+      tasksCopy[index].completed = false;
+      return { ...state, tasks: tasksCopy };
+    }
+
+    default:
+      throw new Error(`Unsupported action type: ${action.type}`);
+  }
+};
+
 const App = () => {
   const {
-    data: tasks,
     error,
     isError,
     isIdle,
     isLoading,
     isSuccess,
-    setData,
     setError,
     run,
-  } = useAsync({
-    error: null,
-    status: 'idle',
-    data: null,
-  });
+  } = useAsync();
+  const [state, dispatch] = useReducer(taskReducer, { tasks: [] });
   const [auth, setAuth] = useLocalStorageState('auth-todo-app', null);
 
   useEffect(() => {
     if (!auth) return;
-    run(client.getTasks(auth.token));
+
+    const populateTasks = async () => {
+      const payload = await run(client.getTasks(auth.token));
+      dispatch({ type: 'POPULATE', payload });
+    };
+    populateTasks();
   }, [run, auth]);
 
   const ErrorFallback = ({ error, resetErrorBoundary }) => (
@@ -58,16 +101,16 @@ const App = () => {
                 <TodoForm
                   auth={auth}
                   ErrorFallback={ErrorFallback}
-                  onData={setData}
+                  onDispatch={dispatch}
                   onError={setError}
-                  tasks={tasks}
+                  tasks={state.tasks}
                 />
                 <TodoLists
                   auth={auth}
                   ErrorFallback={ErrorFallback}
-                  onData={setData}
+                  onDispatch={dispatch}
                   onError={setError}
-                  tasks={tasks}
+                  tasks={state.tasks}
                 />
               </Space>
             ) : null}

@@ -4,70 +4,55 @@ import client from '../utils/api-client';
 
 const { Text } = Typography;
 
-const TodoList = ({ auth, completed, tasks, onData, onError }) => {
+const TodoList = ({ auth, completed, tasks, onDispatch, onError }) => {
   const filtered = tasks.filter((t) => t.completed === completed);
   const count = filtered.length;
   const title = completed ? 'Completed' : 'Pending';
 
-  const onEdit = async (item, editedTask) => {
+  const handleEdit = async (item, editedTask) => {
     const originalTask = [...tasks];
-
-    const tasksCopy = [...tasks];
-    const index = tasksCopy.indexOf(item);
-    tasksCopy[index] = { ...item };
-    tasksCopy[index].description = editedTask;
-    onData(tasksCopy);
+    onDispatch({ type: 'EDIT', item, editedTask });
 
     try {
       await client.editTask(auth.token, item._id, editedTask);
     } catch (error) {
-      onData(originalTask);
+      onDispatch({ type: 'POPULATE', payload: originalTask });
       onError(error);
     }
   };
 
-  const onDelete = async (item) => {
+  const handleDelete = async (item) => {
     const originalTasks = [...tasks];
-    onData(tasks.filter((t) => t._id !== item._id));
+    onDispatch({ type: 'DELETE', payload: item });
 
     try {
       await client.deleteTask(auth.token, item._id);
     } catch (error) {
-      onData(originalTasks);
+      onDispatch(originalTasks);
       onError(error);
     }
   };
 
-  const onComplete = async (item) => {
+  const handleComplete = async (item) => {
     const originalTasks = [...tasks];
-
-    const tasksCopy = [...tasks];
-    const index = tasksCopy.indexOf(item);
-    tasksCopy[index] = { ...item };
-    tasksCopy[index].completed = true;
-    onData(tasksCopy);
+    onDispatch({ type: 'COMPLETE', item });
 
     try {
       await client.completeTask(auth.token, item._id);
     } catch (error) {
-      onData(originalTasks);
+      onDispatch({ type: 'POPULATE', payload: originalTasks });
       onError(error);
     }
   };
 
-  const onIncomplete = async (item) => {
+  const handleIncomplete = async (item) => {
     const originalTasks = [...tasks];
-
-    const tasksCopy = [...tasks];
-    const index = tasksCopy.indexOf(item);
-    tasksCopy[index] = { ...item };
-    tasksCopy[index].completed = false;
-    onData(tasksCopy);
+    onDispatch({ type: 'INCOMPLETE', item });
 
     try {
       await client.inCompleteTask(auth.token, item._id);
     } catch (error) {
-      onData(originalTasks);
+      onDispatch({ type: 'POPULATE', payload: originalTasks });
       onError(error);
     }
   };
@@ -82,7 +67,7 @@ const TodoList = ({ auth, completed, tasks, onData, onError }) => {
             completed ? (
               <Button
                 key="incomplete"
-                onClick={() => onIncomplete(item)}
+                onClick={() => handleIncomplete(item)}
                 type="link"
               >
                 Incomplete
@@ -90,13 +75,13 @@ const TodoList = ({ auth, completed, tasks, onData, onError }) => {
             ) : (
               <Button
                 key="complete"
-                onClick={() => onComplete(item)}
+                onClick={() => handleComplete(item)}
                 type="link"
               >
                 Complete
               </Button>
             ),
-            <Button key="delete" onClick={() => onDelete(item)} type="link">
+            <Button key="delete" onClick={() => handleDelete(item)} type="link">
               Delete
             </Button>,
           ]}
@@ -105,7 +90,7 @@ const TodoList = ({ auth, completed, tasks, onData, onError }) => {
             <Text delete>
               <Typography.Paragraph
                 editable={{
-                  onChange: (editedTask) => onEdit(item, editedTask),
+                  onChange: (editedTask) => handleEdit(item, editedTask),
                 }}
               >
                 {item.description}
@@ -114,7 +99,7 @@ const TodoList = ({ auth, completed, tasks, onData, onError }) => {
           ) : (
             <Typography.Paragraph
               editable={{
-                onChange: (editedTask) => onEdit(item, editedTask),
+                onChange: (editedTask) => handleEdit(item, editedTask),
               }}
             >
               {item.description}

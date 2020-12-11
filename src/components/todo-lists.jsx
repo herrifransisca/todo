@@ -2,23 +2,23 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import TodoList from './todo-list';
 
-const TodoLists = ({ auth, ErrorFallback, onData, onError, tasks }) => {
+const TodoLists = ({ auth, ErrorFallback, onDispatch, onError, tasks }) => {
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
-      onReset={() => onData([])}
+      onReset={() => onDispatch([])}
       resetKeys={[tasks]}
     >
       <TodoList
         auth={auth}
-        onData={onData}
+        onDispatch={onDispatch}
         onError={onError}
         completed={false}
         tasks={tasks}
       />
       <TodoList
         auth={auth}
-        onData={onData}
+        onDispatch={onDispatch}
         onError={onError}
         completed={true}
         tasks={tasks}
